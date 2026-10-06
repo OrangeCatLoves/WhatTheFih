@@ -392,6 +392,15 @@ def build(client, taxa, data_dir, per_class, ool_total, only):
             rng = random.Random(f"{SEED}:{name}")
             jobs.append(("out_of_list", order(cands, rng), plan[name], data_dir / "photos" / "out_of_list", name))
 
+    # A photo attached to more than one observation (e.g. one catch photo of two fish) can't be trusted to
+    # show one fish, and could land in two classes or two splits: leave it out, the next photo replaces it.
+    uses = Counter(c["photo_id"] for _, cands, _, _, _ in jobs for c in cands)
+    shared = {pid for pid, n in uses.items() if n > 1}
+    if shared:
+        print(f"  leaving out {len(shared)} photo(s) attached to more than one observation")
+        jobs = [(label, [c for c in cands if c["photo_id"] not in shared], n, folder, ool_name)
+                for label, cands, n, folder, ool_name in jobs]
+
     total = sum(min(n, len(cands)) for _, cands, n, _, _ in jobs)
     print(f"\nDownloading {total:,} photos at up to 1 per second (photos already on disk are skipped)...", flush=True)
     rows = []
