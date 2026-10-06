@@ -109,3 +109,18 @@ usable; tilapia 10,411 unconfirmed); 300 cap uses a small slice of big classes.
 
 **Full download started**: 7,106 photos (6,769 for 25 classes + 200 out-of-list + 137 dropped-class).
 Log: `data/cache/download.log`.
+
+**Download results** (`data/manifest.csv`)
+- 7,106 photos, 0 failed downloads, 2.78 GB. 25 classes: 4,738 train / 1,016 val / 1,015 test.
+  Out-of-list: 337 (200 + tigerfish 12, sultan fish 37, baung 88).
+- Licences: CC-BY-NC 6,299 (89%), CC-BY 721, CC0 86. **If the app ever makes money, the doc's plan
+  (remove CC-BY-NC photos and retrain) would leave only ~800 photos — not enough.** Commercial use needs
+  a different data plan (own field photos, or licensed photos).
+- Carp: 150 *C. rubrofuscus* + 150 *C. carpio*. Peacock bass: 175 *C. temensis* / *C. orinocensis* +
+  125 others (mostly *C. ocellaris*). Juvenile toman: 15 train / 3 val / 4 test.
+- Photographers: 77–295 different people per class; the largest single contributor has 17% of a class
+  (sailfin catfish). 365 photos are under 1024 px (the originals were smaller), 39 under 500 px.
+- Fix after the first run: 15 photos are attached to more than one observation, e.g. one catch photo
+  filed as both climbing perch (test) and haruan (train) — the same crop would get two labels and leak
+  from train into test. The script now leaves such photos out; 4 picked photos were replaced and the
+  splits of those 4 classes reshuffled (nothing trained yet). 0 duplicate photos now.
