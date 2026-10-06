@@ -1,0 +1,11 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Large or re-creatable data (photos can be re-downloaded from data/manifest.csv)
+data/photos/
+data/crops/
+data/cache/
+embeddings/
