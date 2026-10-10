@@ -9,3 +9,5 @@ data/photos/
 data/crops/
 data/cache/
 embeddings/
+data/review/
+transfer/
