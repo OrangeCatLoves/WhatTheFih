@@ -124,3 +124,45 @@ Log: `data/cache/download.log`.
   filed as both climbing perch (test) and haruan (train) — the same crop would get two labels and leak
   from train into test. The script now leaves such photos out; 4 picked photos were replaced and the
   splits of those 4 classes reshuffled (nothing trained yet). 0 duplicate photos now.
+
+## Stage 3 — Crop (preparation, 2026-10-10)
+
+**User decisions**
+- The GPU work runs on Google Colab (free T4). One session makes Stage 3's boxes *and* Stage 4's BioCLIP 2
+  vectors; the vectors are used only after the user approves Stage 3. The laptop rebuilds the crops
+  from the boxes, so only ~25 MB comes back from Colab (not ~1 GB of crops).
+- Stage 5 gets a zero-shot comparison (BioCLIP 2 matching photos to the 25 names, no training) as a
+  baseline and safety check. The app still uses the trained classifier.
+
+**Choices the doc leaves open** (told to the user; easy to change)
+- "Fish found" threshold 0.35 (GroundingDINO's own default). Every photo's box and vector are saved
+  whatever the score, so changing the threshold later needs no new Colab run.
+- Padding 15% on each side (top of the doc's 10–15%, to protect fins). Square with grey borders in
+  BioCLIP 2's mean colour (0 after its normalisation, so the borders add nothing).
+- Photos are turned upright (EXIF) and shrunk to at most 1024 px before detection. Training photos are
+  already 1024 px; this makes app photos (e.g. 4000 px phone photos) match them.
+
+**Code**
+- `fishid/crop.py` (shared by training and the app): `load_image`, `Detector.best_box`, `padded_rect`,
+  `square_with_borders`, `crop_fish`. `fishid/embed.py`: `Embedder.embed` (length-1 vectors of 768).
+- Both models pinned to exact versions (GroundingDINO `12bdfa3…`, BioCLIP 2 `2957b32…`), so Colab and the
+  app use identical weights. open_clip can't pin a version, so BioCLIP 2 is downloaded at the pinned
+  version and loaded from that folder (`local-dir:`).
+- `scripts/detect_and_embed.py` (Colab): per photo saves the best box, score, the exact crop rectangle
+  and the vector, in parts of 250. Resumes after a disconnect; refuses to resume if the code or models
+  changed; redoes parts a disconnect left unreadable.
+- `scripts/make_crops.py` (laptop): applies the threshold, rebuilds crops from the exact rectangles (so
+  they match what was fingerprinted), counts no-fish per class, flags classes under 100, makes
+  eye-check sheets in `data/review/` (not in git: the photos' licences need credit), writes the report.
+- `colab/stage3_detect_and_embed.ipynb`: installs Python 3.12 + the pinned requirements with uv, apart
+  from Colab's own packages. `scripts/zip_photos.py` → `transfer/photos.zip` (2.79 GB, not in git).
+- `tests/test_crop.py`: 9 tests (padding, photo edges, long fish, empty box, border colour, shrinking,
+  EXIF rotation, rebuilding a crop from its rectangle). All pass.
+
+**Trial on the laptop (10 photos)**: all fish found; featherbacks, swamp eels and snakeheads kept whole;
+vectors have length 1; resume works; a changed-code resume is refused; a corrupted part is redone with
+byte-identical results. A juvenile toman scored 0.37, just over 0.35: watch how many juveniles survive.
+
+**GPU**: the laptop restarted on 2026-10-10. Power limit now 60 W (was 15 W), 1,327 MHz under load,
+~1.1 TFLOPS (was 0.42), but still "SW power cap" at ~24 W. Trial speed 2.7 s/photo: ~5 h for all
+photos on the laptop, vs an estimated 1–1.5 h on Colab.
