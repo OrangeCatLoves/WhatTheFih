@@ -1,0 +1,20 @@
+{
+ "settings": {
+  "code_hash": "b38c5b3af117da26",
+  "detector": "IDEA-Research/grounding-dino-base@12bdfa3120f3e7ec7b434d90674b3396eccf88eb",
+  "prompt": "fish",
+  "padding": 0.15,
+  "border": [
+   123,
+   117,
+   104
+  ],
+  "max_side": 1024,
+  "bioclip": "imageomics/bioclip-2@2957b322090f9cb17ae72c71981c7218a28d81e0",
+  "torch": "2.14.1+cu126",
+  "git_commit": "d2b59d488885e48ebe4fe786687abcc765075701",
+  "python": "3.12.3",
+  "device": "Tesla T4"
+ },
+ "photos": 7106
+}

@@ -166,3 +166,26 @@ byte-identical results. A juvenile toman scored 0.37, just over 0.35: watch how 
 **GPU**: the laptop restarted on 2026-10-10. Power limit now 60 W (was 15 W), 1,327 MHz under load,
 ~1.1 TFLOPS (was 0.42), but still "SW power cap" at ~24 W. Trial speed 2.7 s/photo: ~5 h for all
 photos on the laptop, vs an estimated 1–1.5 h on Colab.
+
+## Stage 3 — Crop (results, 2026-10-10)
+
+**Colab run**: 7,106 photos on a Tesla T4 in ~1 h 45 min, using the committed code (code hash matches).
+Results: `data/detections.csv`, `data/detections_run_info.json`; vectors in `embeddings/all.npz` (not in
+git; backup on Google Drive). Laptop check: same crops give identical vectors (cosine 1.000000, 40
+photos), and re-detecting 12 photos gives the same boxes and crop rectangles. So the app will match training.
+
+**Results** (`reports/crop_report.md`)
+- Fish found in 6,948 of 7,106 photos (97.8%). Skipped per class 0–8% (most: Pangasianodon 8%,
+  Clarias 6%). No class under 100 (giant gourami 127, featherback 112, Mystus 151).
+- Juvenile toman: 20 of 22 kept (14 train / 2 val / 4 test).
+- Eye checks: 20 random crops all show a fish; long fish kept whole. Most skipped photos really are
+  unusable (murky water, fry swarms, a fish in a caiman's mouth); about 1 in 4 was usable. 0.35 kept.
+
+**Found, waiting for the user's decision**
+- Repeat photos: 12 pairs are the same picture posted as 2 observations (one pair labelled both
+  featherback and red-bellied pacu). Also 874 photos come in same-person, same-day, same-class groups;
+  185 groups are split across train/val/test ("open book": a twin in training). Proposed: keep one of
+  each identical picture (drop both of the mixed-label pair, 13 photos), and keep each same-day group in
+  one set (236 photos change set). No GPU rerun needed. A stricter form of the doc's "split by observation".
+- Tiny crops: 39 crops under 64 px are specks; 64–100 px crops are often still recognisable. The doc has
+  no size rule; proposed: no change, and Stage 5 reports results for small crops.
